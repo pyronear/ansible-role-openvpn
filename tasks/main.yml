@@ -1,0 +1,61 @@
+---
+# based on https://hub.docker.com/r/kylemanna/openvpn/
+- name: Install openvpn
+  ansible.builtin.apt:
+    name: openvpn
+    state: present
+
+- name: Check if OpenVPN configuration has been initialized
+  ansible.builtin.stat:
+    path: "{{ openvpn_server_data_path }}/openvpn.conf"
+  register: ovpn_config_check
+
+- name: Initialize OpenVPN configuration if not already done
+  ansible.builtin.command: docker run -v {{ openvpn_server_data_path }}:/etc/openvpn --rm {{ openvpn_server_image }} ovpn_genconfig -u udp://{{ openvpn_server_dns }}:{{ openvpn_server_port }}
+  when: not ovpn_config_check.stat.exists
+  changed_when: false
+
+- name: Check if PKI has been initialized
+  ansible.builtin.stat:
+    path: "{{ openvpn_server_data_path }}/pki/ca.crt"
+  register: ovpn_pki_check
+
+- name: Create the PKI using env var
+  ansible.builtin.command: "docker run -e EASYRSA_PASSIN=pass:{{ ca_password }} -e EASYRSA_PASSOUT=pass:{{ ca_password }} -e EASYRSA_REQ_CN='Easy-RSA CA' -e EASYRSA_BATCH=1 -v {{ openvpn_server_data_path }}:/etc/openvpn --rm
+  {{ openvpn_server_image }} ovpn_initpki"
+  when: not ovpn_pki_check.stat.exists
+  changed_when: false
+
+- name: Ensure OpenVPN data directory exists on the host
+  ansible.builtin.file:
+    path: "{{ openvpn_server_data_path }}/pki/clients"
+    state: directory
+    mode: '0755'
+  when: not ovpn_pki_check.stat.exists
+
+- name: Create passphrase file for OpenVPN
+  ansible.builtin.copy:
+    content: "{{ ca_password }}"
+    dest: "{{ openvpn_server_data_path }}/passphrase.txt"
+    mode: '0600'
+  no_log: true
+  when: not ovpn_pki_check.stat.exists
+
+- name: Start OpenVPN server container if not already running
+  community.docker.docker_container:
+    name: "{{ openvpn_server_container_name }}"
+    image: "{{ openvpn_server_image }}"
+    state: started
+    restart_policy: always
+    volumes:
+      - "{{ openvpn_server_data_path }}:/etc/openvpn"
+    published_ports:
+      - "{{ openvpn_server_port }}:1194/udp"
+    capabilities:
+      - NET_ADMIN
+    sysctls:
+      net.ipv6.conf.default.forwarding: "1"
+      net.ipv6.conf.all.forwarding: "1"
+    command: >
+      ovpn_run --askpass /etc/openvpn/passphrase.txt
+# The client profile specifies redirect-gateway def1, meaning that after establishing the VPN connection, all traffic will go through the VPN

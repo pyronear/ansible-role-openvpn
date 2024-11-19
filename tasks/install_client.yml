@@ -1,0 +1,60 @@
+---
+# Common tasks for all servers
+- name: Install openvpn
+  ansible.builtin.apt:
+    name: openvpn
+    state: present
+
+- name: Check if client configuration exists on OpenVPN client
+  ansible.builtin.stat:
+    path: "/etc/openvpn/client.conf"
+  register: client_conf_stat
+
+- name: Run openvpn_server get_conf
+  ansible.builtin.include_role:
+    name: openvpn_server
+    tasks_from: get_conf
+
+- name: Deploy client configuration on client
+  ansible.builtin.copy:
+    src: "/tmp/{{ inventory_hostname }}.ovpn"
+    dest: "/etc/openvpn/client.conf"
+    mode: '0600'
+  when: not client_conf_stat.stat.exists
+
+- name: Check if client.conf file is not empty
+  ansible.builtin.stat:
+    path: /etc/openvpn/client.conf
+  register: conf_file_stat
+
+- name: Fail if client.conf file is empty
+  ansible.builtin.fail:
+    msg: "The /etc/openvpn/client.conf file is empty!"
+  when: conf_file_stat.stat.size == 0
+
+- name: Ajouter la directive askpass dans client.conf
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/openvpn/client.conf
+    line: "askpass /etc/openvpn/auth.txt"
+    insertafter: EOF
+    state: present
+
+- name: Créer le fichier auth.txt
+  become: yes
+  ansible.builtin.file:
+    path: /etc/openvpn/auth.txt
+    state: touch
+    mode: '0600'
+    owner: root
+    group: root
+
+- name: Ajouter le mot de passe OpenVPN dans auth.txt
+  become: yes
+  ansible.builtin.copy:
+    dest: /etc/openvpn/auth.txt
+    content: "{{ open_vpn_password }}"
+    owner: root
+    group: root
+    mode: '0600'
+  no_log: true
