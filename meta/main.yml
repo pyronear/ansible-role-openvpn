@@ -17,3 +17,10 @@ galaxy_info:
     - docker
     - openvpn-client
     - openvpn-server
+  dependencies:
+    - name: Install Python dependencies
+      pip:
+        - name:
+          - packaging
+          - pexpect
+          - requests

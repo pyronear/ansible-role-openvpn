@@ -1,2 +1,4 @@
-ca_password: test_password # pls use ansible-vault in production
+openvpn_ca_password: test_password # pls use ansible-vault in production
+openvpn_client_password: test_password # pls use ansible-vault in production
 openvpn_server_dns: "openvpn"
+openvpn_server_ansible_host: "server_container"

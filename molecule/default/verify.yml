@@ -1,5 +1,5 @@
-- name: Verify
-  hosts: all
+- name: Verify Openvpn Server
+  hosts: openvpn_server
   gather_facts: true
   tasks:
   - stat:
@@ -15,3 +15,16 @@
       that:
       - "passphrase.stat.mode == '0600'"
       - "conf.stat.exists"
+
+- name: Verify Openvpn Client
+  hosts: openvpn_client
+  gather_facts: true
+  tasks:
+  - stat:
+      path: '/etc/openvpn/auth.txt'
+    register: auth
+
+  - name: tests
+    assert:
+      that:
+      - "auth.stat.mode == '0600'"

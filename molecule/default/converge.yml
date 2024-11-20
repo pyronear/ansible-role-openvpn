@@ -1,23 +1,25 @@
 ---
-- name: Converge
-  hosts: all
-  become: true
-
-  pre_tasks:
-
+- name: Openvpn Server
+  hosts: openvpn_server
+  tasks:
     - name: Install Python 3 and pip
       package:
         name:
           - python3
           - py3-pip
-        state: present
-
-    - name: Install Python libraries via apk
-      package:
-        name:
           - py3-requests
           - py3-packaging
+          - py3-pexpect
         state: present
 
-  roles:
-    - role: pyronear.openvpn
+    - name: Apply OpenVPN server role
+      include_role:
+        name: pyronear.openvpn
+
+- name: Openvpn Client
+  hosts: openvpn_client
+  tasks:
+    - name: Run client-specific tasks
+      include_role: 
+        name: pyronear.openvpn
+        tasks_from: install_client.yml

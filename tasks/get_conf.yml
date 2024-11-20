@@ -3,16 +3,16 @@
   ansible.builtin.stat:
     path: "{{ openvpn_server_data_path }}/pki/clients/{{ inventory_hostname }}.ovpn"
   register: client_conf_stat
-  delegate_to: "{{ openvpn_server_host }}"
+  delegate_to: "{{ openvpn_server_ansible_host }}"
 
 - name: Generate client certificate with password if config does not exist
   ansible.builtin.expect:
     command: "docker exec -ti -e EASYRSA_CERT_EXPIRE=6000 openvpn_server easyrsa build-client-full {{ inventory_hostname }}"
     responses:
-      "Enter PEM pass phrase": "{{ open_vpn_password }}"
-      "Verifying - Enter PEM pass phrase": "{{ open_vpn_password }}"
-      "Enter pass phrase for /etc/openvpn/pki/private/ca.key:": "{{ ca_password }}"
-  delegate_to: "{{ openvpn_server_host }}"
+      "Enter PEM pass phrase": "{{ openvpn_client_password }}"
+      "Verifying - Enter PEM pass phrase": "{{ openvpn_client_password }}"
+      "Enter pass phrase for /etc/openvpn/pki/private/ca.key:": "{{ openvpn_ca_password }}"
+  delegate_to: "{{ openvpn_server_ansible_host }}"
   when: not client_conf_stat.stat.exists
 
 - name: Generate .ovpn file
@@ -21,7 +21,7 @@
     responses:
       "Please specify one of those options as second parameter.": "combined\n"
   register: client_config_output
-  delegate_to: "{{ openvpn_server_host }}"
+  delegate_to: "{{ openvpn_server_ansible_host }}"
   when: not client_conf_stat.stat.exists
 
 - name: Save generated .ovpn file on server
@@ -29,7 +29,7 @@
     content: "{{ client_config_output.stdout }}"
     dest: "{{ openvpn_server_data_path }}/pki/clients/{{ inventory_hostname }}.ovpn"
     mode: '0600'
-  delegate_to: "{{ openvpn_server_host }}"
+  delegate_to: "{{ openvpn_server_ansible_host }}"
   when: not client_conf_stat.stat.exists
 
 - name: Copy .ovpn file from OpenVPN server to client host
@@ -37,5 +37,5 @@
     src: "{{ openvpn_server_data_path }}/pki/clients/{{ inventory_hostname }}.ovpn"
     dest: "/tmp/{{ inventory_hostname }}.ovpn"
     flat: yes
-  delegate_to: "{{ openvpn_server_host }}"
+  delegate_to: "{{ openvpn_server_ansible_host }}"
   when: not client_conf_stat.stat.exists
