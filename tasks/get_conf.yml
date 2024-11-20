@@ -36,6 +36,6 @@
   ansible.builtin.fetch:
     src: "{{ openvpn_server_data_path }}/pki/clients/{{ inventory_hostname }}.ovpn"
     dest: "/tmp/{{ inventory_hostname }}.ovpn"
-    flat: yes
+    flat: true
   delegate_to: "{{ openvpn_server_ansible_host }}"
   when: not client_conf_stat.stat.exists

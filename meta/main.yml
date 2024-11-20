@@ -2,10 +2,9 @@
 dependencies:
   - name: Install Python dependencies
     pip:
-      - name:
-        - packaging
-        - pexpect
-        - requests
+      - packaging
+      - pexpect
+      - requests
 
 galaxy_info:
   role_name: openvpn
