@@ -3,7 +3,7 @@
   hosts: openvpn_server
   tasks:
     - name: Install Python 3 and pip
-      package:
+      ansible.builtin.package:
         name:
           - python3
           - py3-pip
@@ -13,13 +13,13 @@
         state: present
 
     - name: Apply OpenVPN server role
-      include_role:
+      ansible.builtin.include_role:
         name: pyronear.openvpn
 
 - name: Openvpn Client
   hosts: openvpn_client
   tasks:
     - name: Run client-specific tasks
-      include_role: 
+      ansible.builtin.include_role:
         name: pyronear.openvpn
         tasks_from: install_client.yml

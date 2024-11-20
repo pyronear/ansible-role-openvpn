@@ -1,5 +1,11 @@
 ---
-dependencies: []
+dependencies:
+  - name: Install Python dependencies
+    pip:
+      - name:
+        - packaging
+        - pexpect
+        - requests
 
 galaxy_info:
   role_name: openvpn
@@ -8,19 +14,12 @@ galaxy_info:
   description: Openvpn for Linux.
   company: "Pyronear"
   license: "license Apache"
-  min_ansible_version: 3.7
+  min_ansible_version: "3.7"
   platforms:
     - name: Ubuntu
       versions:
         - all
   galaxy_tags:
     - docker
-    - openvpn-client
-    - openvpn-server
-  dependencies:
-    - name: Install Python dependencies
-      pip:
-        - name:
-          - packaging
-          - pexpect
-          - requests
+    - openvpnclient
+    - openvpnserver

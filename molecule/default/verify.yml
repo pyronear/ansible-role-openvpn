@@ -2,16 +2,18 @@
   hosts: openvpn_server
   gather_facts: true
   tasks:
-  - stat:
+  - name: Collect passphrase.txt stats
+    ansible.builtin.stat:
       path: '/srv/openvpn/passphrase.txt'
     register: passphrase
 
-  - stat:
+  - name: Collect openvpn.conf stats
+    ansible.builtin.stat:
       path: '/srv/openvpn/openvpn.conf'
     register: conf
- 
-  - name: tests
-    assert:
+
+  - name: Launch tests
+    ansible.builtin.assert:
       that:
       - "passphrase.stat.mode == '0600'"
       - "conf.stat.exists"
@@ -20,11 +22,12 @@
   hosts: openvpn_client
   gather_facts: true
   tasks:
-  - stat:
+  - name: Collect auth.txt stat
+    ansible.builtin.stat:
       path: '/etc/openvpn/auth.txt'
     register: auth
 
-  - name: tests
-    assert:
+  - name: Launch tests
+    ansible.builtin.assert:
       that:
       - "auth.stat.mode == '0600'"

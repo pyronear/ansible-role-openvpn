@@ -1,6 +1,6 @@
 # Ansible Role: OpenVPN
 
-This Ansible role allows you to install and configure both an **OpenVPN server** and an **OpenVPN client**. 
+This Ansible role allows you to install and configure both an **OpenVPN server** and an **OpenVPN client**.
 
 
 ## Requirements
