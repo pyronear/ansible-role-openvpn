@@ -1,9 +1,5 @@
 ---
 # based on https://hub.docker.com/r/kylemanna/openvpn/
-- name: Install openvpn
-  ansible.builtin.apt:
-    name: openvpn
-    state: present
 
 - name: Check if OpenVPN configuration has been initialized
   ansible.builtin.stat:

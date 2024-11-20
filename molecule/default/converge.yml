@@ -4,9 +4,20 @@
   become: true
 
   pre_tasks:
-    - name: Update apt cache.
-      apt: update_cache=yes cache_valid_time=600
-      when: ansible_os_family == 'Debian'
+
+    - name: Install Python 3 and pip
+      package:
+        name:
+          - python3
+          - py3-pip
+        state: present
+
+    - name: Install Python libraries via apk
+      package:
+        name:
+          - py3-requests
+          - py3-packaging
+        state: present
 
   roles:
     - role: pyronear.openvpn

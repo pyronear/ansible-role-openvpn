@@ -1,0 +1,17 @@
+- name: Verify
+  hosts: all
+  gather_facts: true
+  tasks:
+  - stat:
+      path: '/srv/openvpn/passphrase.txt'
+    register: passphrase
+
+  - stat:
+      path: '/srv/openvpn/openvpn.conf'
+    register: conf
+ 
+  - name: tests
+    assert:
+      that:
+      - "passphrase.stat.mode == '0600'"
+      - "conf.stat.exists"

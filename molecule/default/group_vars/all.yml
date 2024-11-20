@@ -1,0 +1,2 @@
+ca_password: test_password # pls use ansible-vault in production
+openvpn_server_dns: "openvpn"

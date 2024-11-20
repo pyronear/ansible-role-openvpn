@@ -2,5 +2,4 @@
 openvpn_server_data_path: "/srv/openvpn"
 openvpn_server_image: "kylemanna/openvpn"
 openvpn_server_container_name: "openvpn_server"
-openvpn_server_dns: "bastion{{ prefix }}.pyronear.org"
-openvpn_server_port: "3000" # https://forums.openvpn.net/viewtopic.php?t=31462
+openvpn_server_port: "3000"
