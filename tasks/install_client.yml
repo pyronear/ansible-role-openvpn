@@ -1,4 +1,16 @@
 ---
+- name: Check openvpn variables. no_log=true
+  ansible.builtin.fail:
+    msg: item is empty or None.
+  loop:
+    - "{{ openvpn_client_password }}"
+    - "{{ openvpn_ca_password }}"
+    - "{{ openvpn_server_dns }}"
+    - "{{ openvpn_server_ansible_host }}"
+  when:
+    - item is none or item | length == 0
+  no_log: true
+
 - name: Update and upgrade apt packages
   ansible.builtin.apt:
     update_cache: true

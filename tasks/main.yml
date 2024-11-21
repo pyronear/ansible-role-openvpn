@@ -1,6 +1,16 @@
 ---
 # based on https://hub.docker.com/r/kylemanna/openvpn/
 
+- name: Check openvpn variables. no_log=true
+  ansible.builtin.fail:
+    msg: item is empty or None.
+  loop:
+    - "{{ openvpn_ca_password }}"
+    - "{{ openvpn_server_dns }}"
+  when:
+    - item is none or item | length == 0
+  no_log: true
+
 - name: Check if OpenVPN configuration has been initialized
   ansible.builtin.stat:
     path: "{{ openvpn_server_data_path }}/openvpn.conf"
