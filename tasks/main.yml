@@ -16,6 +16,12 @@
     path: "{{ openvpn_server_data_path }}/openvpn.conf"
   register: ovpn_config_check
 
+- name: Log into DockerHub
+  community.docker.docker_login:
+    username: '{{ dockerhub_username }}'
+    password: '{{ dockerhub_password }}'
+  when: dockerhub_password is defined
+
 - name: Initialize OpenVPN configuration if not already done
   ansible.builtin.command: docker run -v {{ openvpn_server_data_path }}:/etc/openvpn --rm {{ openvpn_server_image }} ovpn_genconfig -u udp://{{ openvpn_server_dns }}:{{ openvpn_server_port }}
   when: not ovpn_config_check.stat.exists
