@@ -28,6 +28,8 @@ The following variables must be defined for the role to work. For sensitive valu
 | `openvpn_client_password`     | Password for the OpenVPN client             | Yes      | `"anothersecurepassword"`|
 | `openvpn_server_dns`          | DNS for the OpenVPN server                  | Yes      | `"vpn.example.com"`      |
 | `openvpn_server_ansible_host` | Hostname or IP address of the OpenVPN server| Yes      | `"192.168.1.100"`        |
+| `dockerhub_username` | Your DockerHub Username | No      | `"myname"`        |
+| `dockerhub_password` | Your DockerHub Password| No      | `"securepassword1234"`        |
 
 **Example Playbook:**
 ```yaml
