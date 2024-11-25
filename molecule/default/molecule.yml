@@ -8,14 +8,21 @@ lint: |
   yamllint
   ansible-lint
 platforms:
-  - name: openvpn
+  - name: server_container
     image: docker:27-dind
     privileged: true
     command: "dockerd-entrypoint.sh"
+    groups:
+      - openvpn_server
+  - name: client_container
+    image: ubuntu:24.04
+    privileged: true
+    groups:
+      - openvpn_client
 provisioner:
   name: ansible
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
 verifier:
   name: ansible
-  enabled: True
+  enabled: true

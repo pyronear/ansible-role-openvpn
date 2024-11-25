@@ -3,3 +3,10 @@ openvpn_server_data_path: "/srv/openvpn"
 openvpn_server_image: "kylemanna/openvpn"
 openvpn_server_container_name: "openvpn_server"
 openvpn_server_port: "3000"
+
+# openvpn_ca_password:  # pls use ansible-vault in production
+# openvpn_client_password:  # pls use ansible-vault in production
+# openvpn_server_dns:
+# openvpn_server_ansible_host:
+# dockerhub_username:   # not mandatory but useful in case of "too many pull requests"
+# dockerhub_password    # not mandatory but useful in case of "too many pull requests"

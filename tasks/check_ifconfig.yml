@@ -1,0 +1,15 @@
+---
+- name: Install net-tools for ifconfig
+  ansible.builtin.apt:
+    name: net-tools
+    state: present
+
+- name: Check if tun0 network interface is present
+  ansible.builtin.command: ifconfig
+  register: ifconfig_output
+  changed_when: false
+
+- name: Verify tun0 network interface exists
+  ansible.builtin.fail:
+    msg: "The tun0 network interface is not present."
+  when: "'tun0' not in ifconfig_output.stdout"

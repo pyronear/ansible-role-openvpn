@@ -1,5 +1,22 @@
 ---
-# Common tasks for all servers
+- name: Check openvpn variables. no_log=true
+  ansible.builtin.fail:
+    msg: item is empty or None.
+  loop:
+    - "{{ openvpn_client_password }}"
+    - "{{ openvpn_ca_password }}"
+    - "{{ openvpn_server_dns }}"
+    - "{{ openvpn_server_ansible_host }}"
+  when:
+    - item is none or item | length == 0
+  no_log: true
+
+- name: Update and upgrade apt packages
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: dist
+    autoremove: true
+
 - name: Install openvpn
   ansible.builtin.apt:
     name: openvpn
@@ -10,10 +27,11 @@
     path: "/etc/openvpn/client.conf"
   register: client_conf_stat
 
-- name: Run openvpn_server get_conf
+- name: Get openvpn client configuration
   ansible.builtin.include_role:
-    name: openvpn_server
+    name: pyronear.openvpn
     tasks_from: get_conf
+  when: not client_conf_stat.stat.exists
 
 - name: Deploy client configuration on client
   ansible.builtin.copy:
@@ -33,7 +51,6 @@
   when: conf_file_stat.stat.size == 0
 
 - name: Ajouter la directive askpass dans client.conf
-  become: yes
   ansible.builtin.lineinfile:
     path: /etc/openvpn/client.conf
     line: "askpass /etc/openvpn/auth.txt"
@@ -41,19 +58,19 @@
     state: present
 
 - name: Créer le fichier auth.txt
-  become: yes
   ansible.builtin.file:
     path: /etc/openvpn/auth.txt
     state: touch
     mode: '0600'
     owner: root
     group: root
+    access_time: preserve
+    modification_time: preserve
 
 - name: Ajouter le mot de passe OpenVPN dans auth.txt
-  become: yes
   ansible.builtin.copy:
     dest: /etc/openvpn/auth.txt
-    content: "{{ open_vpn_password }}"
+    content: "{{ openvpn_client_password }}"
     owner: root
     group: root
     mode: '0600'

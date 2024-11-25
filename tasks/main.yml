@@ -1,10 +1,26 @@
 ---
 # based on https://hub.docker.com/r/kylemanna/openvpn/
 
+- name: Check openvpn variables. no_log=true
+  ansible.builtin.fail:
+    msg: item is empty or None.
+  loop:
+    - "{{ openvpn_ca_password }}"
+    - "{{ openvpn_server_dns }}"
+  when:
+    - item is none or item | length == 0
+  no_log: true
+
 - name: Check if OpenVPN configuration has been initialized
   ansible.builtin.stat:
     path: "{{ openvpn_server_data_path }}/openvpn.conf"
   register: ovpn_config_check
+
+- name: Log into DockerHub
+  community.docker.docker_login:
+    username: '{{ dockerhub_username }}'
+    password: '{{ dockerhub_password }}'
+  when: dockerhub_password is defined
 
 - name: Initialize OpenVPN configuration if not already done
   ansible.builtin.command: docker run -v {{ openvpn_server_data_path }}:/etc/openvpn --rm {{ openvpn_server_image }} ovpn_genconfig -u udp://{{ openvpn_server_dns }}:{{ openvpn_server_port }}
@@ -17,7 +33,7 @@
   register: ovpn_pki_check
 
 - name: Create the PKI using env var
-  ansible.builtin.command: "docker run -e EASYRSA_PASSIN=pass:{{ ca_password }} -e EASYRSA_PASSOUT=pass:{{ ca_password }} -e EASYRSA_REQ_CN='Easy-RSA CA' -e EASYRSA_BATCH=1 -v {{ openvpn_server_data_path }}:/etc/openvpn --rm
+  ansible.builtin.command: "docker run -e EASYRSA_PASSIN=pass:{{ openvpn_ca_password }} -e EASYRSA_PASSOUT=pass:{{ openvpn_ca_password }} -e EASYRSA_REQ_CN='Easy-RSA CA' -e EASYRSA_BATCH=1 -v {{ openvpn_server_data_path }}:/etc/openvpn --rm
   {{ openvpn_server_image }} ovpn_initpki"
   when: not ovpn_pki_check.stat.exists
   changed_when: false
@@ -31,7 +47,7 @@
 
 - name: Create passphrase file for OpenVPN
   ansible.builtin.copy:
-    content: "{{ ca_password }}"
+    content: "{{ openvpn_ca_password }}"
     dest: "{{ openvpn_server_data_path }}/passphrase.txt"
     mode: '0600'
   no_log: true
