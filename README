@@ -18,6 +18,18 @@ pip install requests packaging pexpect
 
 This role relies also on the Docker image [`kylemanna/openvpn`](https://hub.docker.com/r/kylemanna/openvpn) to set up the OpenVPN server. Ensure that Docker is installed and properly configured on the server where the role will run.
 
+## Reboot the machine & final test
+
+You will need to reboot the client after the installation :
+```
+- name: Unconditionally reboot the machine with all defaults
+  ansible.builtin.reboot:
+```
+
+Openvpn is configured to redirect all the trafic through the VPN so after the reboot, you will need to be connected to the VPN to be able to connect to your machine.
+
+If you want to be sure that everything has worked, once connected to the VPN, you can launch the tasks check_ifcongif.yml.
+
 ## Role Variables
 
 The following variables must be defined for the role to work. For sensitive values, it is recommended to use **Ansible Vault** in production environments.

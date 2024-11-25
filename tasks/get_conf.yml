@@ -2,7 +2,7 @@
 - name: Check if client configuration exists on OpenVPN server
   ansible.builtin.stat:
     path: "{{ openvpn_server_data_path }}/pki/clients/{{ inventory_hostname }}.ovpn"
-  register: client_conf_stat
+  register: client_ovpn_stat
   delegate_to: "{{ openvpn_server_ansible_host }}"
 
 - name: Generate client certificate with password if config does not exist
@@ -13,7 +13,7 @@
       "Verifying - Enter PEM pass phrase": "{{ openvpn_client_password }}"
       "Enter pass phrase for /etc/openvpn/pki/private/ca.key:": "{{ openvpn_ca_password }}"
   delegate_to: "{{ openvpn_server_ansible_host }}"
-  when: not client_conf_stat.stat.exists
+  when: not client_ovpn_stat.stat.exists
 
 - name: Generate .ovpn file
   ansible.builtin.expect:
@@ -22,7 +22,7 @@
       "Please specify one of those options as second parameter.": "combined\n"
   register: client_config_output
   delegate_to: "{{ openvpn_server_ansible_host }}"
-  when: not client_conf_stat.stat.exists
+  when: not client_ovpn_stat.stat.exists
 
 - name: Save generated .ovpn file on server
   ansible.builtin.copy:
@@ -30,7 +30,7 @@
     dest: "{{ openvpn_server_data_path }}/pki/clients/{{ inventory_hostname }}.ovpn"
     mode: '0600'
   delegate_to: "{{ openvpn_server_ansible_host }}"
-  when: not client_conf_stat.stat.exists
+  when: not client_ovpn_stat.stat.exists
 
 - name: Copy .ovpn file from OpenVPN server to client host
   ansible.builtin.fetch:
@@ -38,4 +38,3 @@
     dest: "/tmp/{{ inventory_hostname }}.ovpn"
     flat: true
   delegate_to: "{{ openvpn_server_ansible_host }}"
-  when: not client_conf_stat.stat.exists

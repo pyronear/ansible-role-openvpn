@@ -21,8 +21,6 @@ platforms:
       - openvpn_client
 provisioner:
   name: ansible
-  options:
-    skip-tags: reboot
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
 verifier:
